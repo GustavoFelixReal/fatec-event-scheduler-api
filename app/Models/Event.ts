@@ -38,9 +38,6 @@ export default class Event extends AppBaseModel {
   public objective: string
 
   @column()
-  public voiceOverSuggestions: string
-
-  @column()
   public contactDetails: string
 
   @column()
@@ -48,12 +45,6 @@ export default class Event extends AppBaseModel {
 
   @column()
   public endDate: DateTime
-
-  @column()
-  public isRecurrent: boolean
-
-  @column()
-  public recurrencyRule: string
 
   @column()
   public location: string
@@ -65,13 +56,7 @@ export default class Event extends AppBaseModel {
   public isPublic: boolean
 
   @column()
-  public department: string
-
-  @column()
   public status: string
-
-  @column()
-  public cycle: string
 
   @column()
   public createdBy: number

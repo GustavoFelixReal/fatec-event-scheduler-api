@@ -1,10 +1,8 @@
-import Env from '@ioc:Adonis/Core/Env'
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 
 import {
   changeStatusEventValidator,
   createEventValidator,
-  cycleListValidator,
   findEventValidator,
   updateEventValidator
 } from 'App/Validators/Events'
@@ -41,15 +39,12 @@ export default class EventsController {
       title: payload.title,
       description: payload.description,
       objective: payload.objective,
-      voiceOverSuggestions: payload.voiceOverSuggestions,
       contactDetails: payload.contactDetails,
       startDate: payload.startDate,
       endDate: payload.endDate,
       location: payload.location,
       isInternal: payload.isInternal,
-      department: payload.department,
       status: 'PENDING',
-      cycle: this.setCycle(),
       createdBy: id,
       updatedBy: id
     })
@@ -69,25 +64,6 @@ export default class EventsController {
     )
 
     return response.status(200).json({ event })
-  }
-
-  public async cycleList({ auth, request, response }: HttpContextContract) {
-    const payload = request.params()
-
-    await cycleListValidator.validate(payload)
-
-    const { id } = auth.user.$attributes
-
-    const events = await Event.query()
-      .select('id', 'title', 'date', 'status', 'cycle', 'updatedBy')
-      .whereRaw('created_by = ?', [id])
-      .andWhereNotIn('status', ['CANCELED', 'REJECTED', 'COMPLETED'])
-      .andWhere('cycle', payload.cycle)
-      .preload('maintainer', (query) => {
-        query.select('id', 'name')
-      })
-
-    return response.status(200).json({ events })
   }
 
   public async find({ auth, request, response }: HttpContextContract) {
@@ -132,14 +108,11 @@ export default class EventsController {
         title: payload.title,
         description: payload.description,
         objective: payload.objective,
-        voiceOverSuggestions: payload.voiceOverSuggestions,
         contactDetails: payload.contactDetails,
         startDate: payload.startDate,
         endDate: payload.endDate,
         location: payload.location,
         isInternal: payload.isInternal,
-        department: payload.department,
-        cycle: this.setCycle(),
         createdBy: id,
         updatedBy: id
       })
@@ -172,35 +145,5 @@ export default class EventsController {
     }
 
     return response.status(200).json({ event })
-  }
-
-  private setCycle() {
-    const currentDate = new Date()
-    const currentWeekDay = currentDate.getDay() + 1
-
-    if (currentWeekDay > Number(Env.get('EVENT_MAX_SUBMISSION_WEEK_DAY'))) {
-      return this.getCycle(currentDate, 1).cycle
-    }
-
-    return this.getCycle(currentDate).cycle
-  }
-
-  private getCycle(
-    date: Date,
-    incrementWeek = 0
-  ): { cycle: string; currentWeek: number } {
-    const startDate = new Date(date.getFullYear(), 0, 1)
-
-    const pastDays = Math.floor(
-      (date.getTime() - startDate.getTime()) / (24 * 60 * 60 * 1000)
-    )
-
-    const currentWeek = Math.ceil(pastDays / 7)
-
-    const cycle = `${('0' + (currentWeek + incrementWeek)).slice(
-      -2
-    )}${date.getFullYear()}`
-
-    return { cycle, currentWeek }
   }
 }

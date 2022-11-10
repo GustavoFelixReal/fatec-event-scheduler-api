@@ -5,7 +5,6 @@ export const createEventValidator = yup.object().shape({
   title: yup.string().required('validation.event_title_required'),
   description: yup.string().required('validation.event_description_required'),
   objective: yup.string().required('validation.event_objective_required'),
-  voiceOverSuggestions: yup.string().max(300),
   contactDetails: yup.string().max(300),
   startDate: yup.date().required('validation.event_start_date_required'),
   endDate: yup.date().required('validation.event_end_date_required'),
@@ -24,10 +23,6 @@ export const createEventValidator = yup.object().shape({
   )
 })
 
-export const cycleListValidator = yup.object().shape({
-  cycle: yup.string().required('validation.event_cycle_required')
-})
-
 export const findEventValidator = yup.object().shape({
   id: yup.string().required('validation.event_id_required')
 })
@@ -37,7 +32,6 @@ export const updateEventValidator = yup.object().shape({
   title: yup.string().required('validation.event_title_required'),
   description: yup.string().required('validation.event_description_required'),
   objective: yup.string().required('validation.event_objective_required'),
-  voiceOverSuggestions: yup.string().max(300),
   contactDetails: yup.string().max(300),
   startDate: yup.date().required('validation.event_start_date_required'),
   endDate: yup.date().required('validation.event_end_date_required'),
