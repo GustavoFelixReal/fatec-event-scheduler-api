@@ -27,6 +27,11 @@ Route.group(() => {
   Route.post('/register', 'AuthController.register')
 })
 
+// Current user
+Route.group(() => {
+  Route.get('/me', 'AuthController.user')
+}).middleware('auth')
+
 // Users
 Route.group(() => {
   Route.get('/users', 'UsersController.index')
@@ -34,9 +39,14 @@ Route.group(() => {
   Route.put('/users/:id', 'UsersController.update')
 }).middleware('auth')
 
-// Events
+// Events (Public)
 Route.group(() => {
   Route.get('/events', 'EventsController.index')
+})
+
+// Events
+Route.group(() => {
+  Route.get('/events/by_category', 'EventsController.byCategory')
   Route.post('/events', 'EventsController.store')
   Route.get('/events/cycle/:cycle', 'EventsController.cycleList')
   Route.get('/events/:id', 'EventsController.find')

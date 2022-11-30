@@ -17,9 +17,9 @@ interface CalendarEvent {
   id: string
   anyoneCanAddSelf?: boolean
   status?: EventStatus
-  summary: string
-  location: string
-  description: string
+  summary?: string
+  location?: string
+  description?: string
   start: EventDateTime | AllDayEventDateTime
   end: EventDateTime | AllDayEventDateTime
 }
@@ -61,11 +61,16 @@ export default class Calendar {
     })
   }
 
-  public async changeEventStatus(eventId: string, status: EventStatus) {
+  public async changeEventStatus(
+    eventId: string,
+    status: EventStatus,
+    event: CalendarEvent
+  ) {
     await this.calendar.events.update({
       calendarId: Env.get('GOOGLE_CALENDAR_ID'),
       eventId,
       requestBody: {
+        ...event,
         status
       }
     })

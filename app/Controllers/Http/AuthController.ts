@@ -10,15 +10,19 @@ export default class AuthController {
 
     try {
       const token = await auth.use('api').attempt(email, password, {
-        expiresIn: '1day'
+        expiresIn: '7days'
       })
 
       response.header('Authorization', 'Bearer ' + token.token)
 
-      return response.status(200)
+      return response.status(200).json({ user: token.user, token: token.token })
     } catch {
       return response.status(400).send('Invalid credentials')
     }
+  }
+
+  public async user({ auth, response }: HttpContextContract) {
+    return response.status(200).json({ user: auth.user })
   }
 
   public async logout({ auth, response }: HttpContextContract) {

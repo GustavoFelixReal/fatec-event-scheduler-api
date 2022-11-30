@@ -19,7 +19,7 @@ export default class Event extends AppBaseModel {
     'PENDING',
     'APPROVED',
     'REJECTED',
-    'CANCELED'
+    'CANCELLED'
   ]
 
   @column({ isPrimary: true })

@@ -23,9 +23,44 @@ export default class EventsController {
       .preload('relatedLinks', (query) => {
         query.select('id', 'url', 'description')
       })
-      .orWhere('isInternal', false)
+      .where('status', 'APPROVED')
+      .where('isInternal', false)
 
     return response.status(200).json({ events })
+  }
+
+  public async byCategory({ response }: HttpContextContract) {
+    const upcomingEvents = await Event.query()
+      .preload('images', (query) => {
+        query.select('id', 'src', 'description')
+      })
+      .preload('relatedLinks', (query) => {
+        query.select('id', 'url', 'description')
+      })
+      .where('status', 'APPROVED')
+
+    const pendingEvents = await Event.query()
+      .preload('images', (query) => {
+        query.select('id', 'src', 'description')
+      })
+      .preload('relatedLinks', (query) => {
+        query.select('id', 'url', 'description')
+      })
+      .where('status', 'PENDING')
+
+    const canceledEvents = await Event.query()
+      .preload('images', (query) => {
+        query.select('id', 'src', 'description')
+      })
+      .preload('relatedLinks', (query) => {
+        query.select('id', 'url', 'description')
+      })
+      .where('status', 'CANCELLED')
+      .orWhere('status', 'REJECTED')
+
+    return response
+      .status(200)
+      .json({ upcomingEvents, pendingEvents, canceledEvents })
   }
 
   public async store({ auth, request, response }: HttpContextContract) {
@@ -49,19 +84,23 @@ export default class EventsController {
       updatedBy: id
     })
 
-    await EventImage.createMany(
-      payload.images.map((image) => ({
-        ...image,
-        eventId: event.id
-      }))
-    )
+    if (payload.images) {
+      await EventImage.createMany(
+        payload.images.map((image) => ({
+          ...image,
+          eventId: event.id
+        }))
+      )
+    }
 
-    await EventLink.createMany(
-      payload.links.map((link) => ({
-        ...link,
-        eventId: event.id
-      }))
-    )
+    if (payload.links) {
+      await EventLink.createMany(
+        payload.links.map((link) => ({
+          ...link,
+          eventId: event.id
+        }))
+      )
+    }
 
     return response.status(200).json({ event })
   }
@@ -78,6 +117,12 @@ export default class EventsController {
       .whereRaw('created_by = ?', [id])
       .preload('author')
       .preload('maintainer')
+      .preload('images', (query) => {
+        query.select('id', 'src', 'description')
+      })
+      .preload('relatedLinks', (query) => {
+        query.select('id', 'url', 'description')
+      })
       .first()
 
     if (!event) {
@@ -132,6 +177,14 @@ export default class EventsController {
     let event = await Event.query()
       .where('id', eventId)
       .whereRaw('created_by = ?', [id])
+      .preload('author')
+      .preload('maintainer')
+      .preload('images', (query) => {
+        query.select('id', 'src', 'description')
+      })
+      .preload('relatedLinks', (query) => {
+        query.select('id', 'url', 'description')
+      })
       .first()
 
     if (!event) {
