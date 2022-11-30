@@ -29,8 +29,14 @@ export default class EventsController {
     return response.status(200).json({ events })
   }
 
-  public async byCategory({ response }: HttpContextContract) {
+  public async byCategory({ auth, response }: HttpContextContract) {
+    const { id } = auth.user.$attributes
+
     const upcomingEvents = await Event.query()
+      .whereRaw(
+        '(created_by = ? OR (SELECT is_admin FROM users WHERE id = ?) = true)',
+        [id, id]
+      )
       .preload('images', (query) => {
         query.select('id', 'src', 'description')
       })
@@ -40,6 +46,10 @@ export default class EventsController {
       .where('status', 'APPROVED')
 
     const pendingEvents = await Event.query()
+      .whereRaw(
+        '(created_by = ? OR (SELECT is_admin FROM users WHERE id = ?) = true)',
+        [id, id]
+      )
       .preload('images', (query) => {
         query.select('id', 'src', 'description')
       })
@@ -49,6 +59,10 @@ export default class EventsController {
       .where('status', 'PENDING')
 
     const canceledEvents = await Event.query()
+      .whereRaw(
+        '(created_by = ? OR (SELECT is_admin FROM users WHERE id = ?) = true)',
+        [id, id]
+      )
       .preload('images', (query) => {
         query.select('id', 'src', 'description')
       })
@@ -114,7 +128,10 @@ export default class EventsController {
 
     const event = await Event.query()
       .where('id', payload.id)
-      .whereRaw('created_by = ?', [id])
+      .whereRaw(
+        '(created_by = ? OR (SELECT is_admin FROM users WHERE id = ?) = true)',
+        [id, id]
+      )
       .preload('author')
       .preload('maintainer')
       .preload('images', (query) => {
@@ -176,7 +193,10 @@ export default class EventsController {
 
     let event = await Event.query()
       .where('id', eventId)
-      .whereRaw('created_by = ?', [id])
+      .whereRaw(
+        '(created_by = ? OR (SELECT is_admin FROM users WHERE id = ?) = true)',
+        [id, id]
+      )
       .preload('author')
       .preload('maintainer')
       .preload('images', (query) => {
